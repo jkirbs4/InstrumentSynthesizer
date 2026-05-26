@@ -41,10 +41,10 @@ class ScoreReader:
         if not isinstance(score, list):
             raise ValueError("A musical score must be formatted as a list.")
         
-        return [self.read_note(note) for note in score]
+        return [self._read_note(note) for note in score]
 
     
-    def read_note(self, note: str):
+    def _read_note(self, note: str):
         """
         Read a note and parse information 
 
