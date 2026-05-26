@@ -9,7 +9,7 @@ def test_numerical_pitch():
 	assert tone.duration == pytest.approx(0.5)
 	assert tone.get_duration() == pytest.approx(0.5)
 	assert tone.amplitude == pytest.approx(0.8)
-	assert tone.get_data() == (pytest.approx(440.0), pytest.approx(0.5), pytest.approx(0.8))
+	assert tone.data() == (pytest.approx(440.0), pytest.approx(0.5), pytest.approx(0.8))
 
 
 def test_symbol_pitch():
@@ -19,7 +19,7 @@ def test_symbol_pitch():
 	assert tone.duration == pytest.approx(0.25)
 	assert tone.get_duration() == pytest.approx(0.25)
 	assert tone.amplitude == pytest.approx(0.4)
-	assert tone.get_data() == (pytest.approx(440.0), pytest.approx(0.5), pytest.approx(0.8))
+	assert tone.data() == (pytest.approx(440.0), pytest.approx(0.25), pytest.approx(0.4))
 
 
 @pytest.mark.parametrize("amplitude", [-0.01, 1.01])

@@ -1,4 +1,4 @@
-from src.pitch import PitchConverter
+from src.pitch_converter import PitchConverter
 
 class Tone:
 

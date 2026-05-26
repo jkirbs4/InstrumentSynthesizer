@@ -3,7 +3,7 @@ from src.tone import Tone
 
 class Chord:
 
-    def __init__(self, tones: list):
+    def __init__(self, tones: list[Tone]):
 
         if (len(tones) < 2):
             raise ValueError("A chord must be comprised of at least two tones.")
@@ -20,3 +20,4 @@ class Chord:
 
     def get_duration(self):
         return self.duration
+
