@@ -4,29 +4,26 @@ from src.pitch_converter import PitchConverter
 from src.tone import Tone
 
 
-class Instrument():
+class Instrument:
 
-    def __init__(self, harmonics: list, weights: list, default_dynamic: str):
+    def __init__(self, partials: list[tuple], default_dynamic: str):
         """
         Initialize the hyperparameters of the instrument.
 
+        @param partials (list[tuple]): The collection of harmonics and inharmonics listed as (pitch_weight, amplitude_weight).
         @param default_dynamic (str): The dynamic to default to if one is not provided in the note.
         """
         self.score_reader = ScoreReader(default_dynamic)
-        if not isinstance(harmonics, list):
-            raise ValueError("Harmonics must be a list of positive integer multiples.")
-        for harmonic in harmonics:
-            if (not isinstance(harmonic, int) or harmonic < 0):
-                raise ValueError("Harmonics must be a list of positive integer multiples.")
-        if not isinstance(weights, list):
-            raise ValueError("Harmonic weights must be a list of float multipliers.")
-        for weight in weights:
-            if (not isinstance(weight, int) or weight < 0):
-                raise ValueError("Harmonic weights must be a list of float multipliers.")
-        if (len(harmonics) != len(weights)):
-            raise ValueError("A matching pair must exist for each harmonic and weight.")
-        self.harmonics = harmonics
-        self.weights = weights
+        if not isinstance(partials, list):
+            raise ValueError("Partials must be a list of tuples of floats.")
+        for partial in partials:
+            if not isinstance(partial, tuple):
+                raise ValueError("Each partial must be a tuple of (pitch_weight, amplitude_weight).")
+            if not isinstance(partial[0], float):
+                raise ValueError("The pitch weight must be a float.")
+            if not isinstance(partial[1], float):
+                raise ValueError("The amplitude weight must be a float.")
+        self.partials = partials
 
 
     def __call__(self, score: list[str]):
@@ -36,7 +33,7 @@ class Instrument():
 
     def data(self):
 
-        return (self.harmonics, self.weights, self.default_dynamic)
+        return (self.partials, self.default_dynamic)
         
 
     def _generate_music(self, score: list[str]):
@@ -55,9 +52,14 @@ class Instrument():
 
         base_frequency = PitchConverter.symbol_to_pitch(pitch)
 
-        tones = []
-        for harmonic, weight in zip(self.harmonics, self.weights):
-            tones.append(Tone(base_frequency * harmonic, duration, loudness * weight))
+        tones = [
+            Tone(
+                base_frequency * pitch_weight,
+                duration,
+                loudness * amplitude_weight,
+            )
+            for pitch_weight, amplitude_weight in self.partials
+        ]
 
         return Chord(tones)
 
