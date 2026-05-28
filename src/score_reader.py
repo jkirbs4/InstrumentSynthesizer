@@ -24,9 +24,9 @@ class ScoreReader:
         }
 
         if not isinstance(default_dynamic, str):
-            return ValueError("Default dynamic must be a string value.")
+            raise ValueError("Default dynamic must be a string value.")
         if default_dynamic not in list(self.DYNAMICS.keys()):
-            return ValueError(f"Default dynamic must be of {list(self.DYNAMICS.keys())}")
+            raise ValueError(f"Default dynamic must be of {list(self.DYNAMICS.keys())}.")
         self.default_dynamic = default_dynamic
 
 
@@ -54,7 +54,7 @@ class ScoreReader:
             raise ValueError("All musical notes must be string values.")
         
         if not re.fullmatch(r"([A-G])([b#]?)([0-8])([WHQES])(@(pp|mp|mf|ff|p|f))?", note):
-            raise ValueError("Symbol must be note, [flat or sharp], octave. (ex: Ab4, B#3, C5)")
+            raise ValueError("Symbol must be note, flat or sharp, octave, duration, [@ dynamic]. (ex: Ab4W, B#3Q, C5E@pf)")
 
         # extract pitch
         if ('b' in note or '#' in note):

@@ -33,7 +33,7 @@ class Instrument:
 
     def data(self):
 
-        return (self.partials, self.default_dynamic)
+        return (self.partials, self.score_reader.default_dynamic)
         
 
     def _generate_music(self, score: list[str]):

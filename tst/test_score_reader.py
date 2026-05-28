@@ -27,12 +27,12 @@ def test_bad_scores():
     with pytest.raises(ValueError, match="All musical notes must be string values."):
         reader.read_score(["C4Q", 42])
 
-    with pytest.raises(ValueError, match=r"Symbol must be note, \[flat or sharp\], octave\. \(ex: Ab4, B#3, C5\)"):
+    with pytest.raises(ValueError, match=r"Symbol must be note, flat or sharp, octave, duration, \[@ dynamic\]\. \(ex: Ab4W, B#3Q, C5E@pf\)"):
         reader.read_score(["H4Q"])
 
-    with pytest.raises(ValueError, match=r"Symbol must be note, \[flat or sharp\], octave\. \(ex: Ab4, B#3, C5\)"):
+    with pytest.raises(ValueError, match=r"Symbol must be note, flat or sharp, octave, duration, \[@ dynamic\]\. \(ex: Ab4W, B#3Q, C5E@pf\)"):
         reader.read_score(["C4T"])
 
-    with pytest.raises(ValueError, match=r"Symbol must be note, \[flat or sharp\], octave\. \(ex: Ab4, B#3, C5\)"):
+    with pytest.raises(ValueError, match=r"Symbol must be note, flat or sharp, octave, duration, \[@ dynamic\]\. \(ex: Ab4W, B#3Q, C5E@pf\)"):
         reader.read_score(["Bb9Q@mf"])
 
