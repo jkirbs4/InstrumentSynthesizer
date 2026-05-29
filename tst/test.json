@@ -1,20 +1,34 @@
 {
-  "trumpet@mf": [
-    "C4Q@mf", "E4Q@mf", "G4Q@f", "E4Q@mf",
-    "D4Q@mp", "F4Q@mf", "A4Q@f", "G4Q@mf",
-    "E4Q@mf", "G4Q@f", "C5H@ff",
-    "B4Q@mf", "A4Q@mf", "G4H@f"
-  ],
-  "piano@mp": [
-    "C3H@mp", "G3H@mp",
-    "D3H@mp", "A3H@mp",
-    "E3H@mp", "C4H@mp",
-    "G2H@mf", "G3H@mf"
-  ],
-  "flute@p": [
-    "E5E@p", "G5E@p", "C6Q@mp", "G5Q@p",
-    "F5E@p", "A5E@p", "D6Q@mp", "A5Q@p",
-    "G5E@mp", "E5E@mp", "C5Q@p", "E5Q@mp",
-    "D5Q@p", "B4Q@p", "C5H@mf"
+  "tracks": [
+    {
+      "instrument": "trumpet",
+      "dynamic": "mf",
+      "notes": [
+        "C4Q@mf", "E4Q@mf", "G4Q@f", "E4Q@mf",
+        "D4Q@mp", "F4Q@mf", "A4Q@f", "G4Q@mf",
+        "E4Q@mf", "G4Q@f", "C5H@ff",
+        "B4Q@mf", "A4Q@mf", "G4H@f"
+      ]
+    },
+    {
+      "instrument": "piano",
+      "dynamic": "mp",
+      "notes": [
+        "C3H@mp", "G3H@mp",
+        "D3H@mp", "A3H@mp",
+        "E3H@mp", "C4H@mp",
+        "G2H@mf", "G3H@mf"
+      ]
+    },
+    {
+      "instrument": "flute",
+      "dynamic": "p",
+      "notes": [
+        "E5E@p", "G5E@p", "C6Q@mp", "G5Q@p",
+        "F5E@p", "A5E@p", "D6Q@mp", "A5Q@p",
+        "G5E@mp", "E5E@mp", "C5Q@p", "E5Q@mp",
+        "D5Q@p", "B4Q@p", "C5H@mf"
+      ]
+    }
   ]
 }
