@@ -31,7 +31,7 @@ def assert_music(music: list[Chord], score: list[str], partials: list[tuple[floa
 
     actual_frequencies = [tone.frequency for chord in music for tone in chord.tones()]
     actual_amplitudes = [tone.amplitude for chord in music for tone in chord.tones()]
-    print(actual_amplitudes, all_amplitudes)
+
     assert sorted(actual_frequencies) == pytest.approx(sorted(all_frequencies))
     assert sorted(actual_amplitudes) == pytest.approx(sorted(all_amplitudes))
 
