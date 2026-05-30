@@ -1,4 +1,7 @@
 import json
+import re
+from src.music_file import MusicFile
+
 
 class JsonParser:
 
@@ -11,6 +14,7 @@ class JsonParser:
 
         return (dict): The dict representation of the .json file.
         """
+
         if not isinstance(filename, str):
             raise ValueError("Filename must be a string value.")
         if ".json" not in filename:
@@ -18,30 +22,35 @@ class JsonParser:
         
         with open(filename, "r") as file:
             json_data: dict = json.load(file) # checks valid JSON format
+
+        errors = [] # collect erros as they are caught
         
         # check first level categories
         if not "instruments" in list(json_data.keys()):
-            raise ValueError("Field 'instruments' must exist in top level of music generation JSON file.")
+            errors.append("Field 'instruments' must exist in top level of music generation JSON file.")
         if not "tracks" in list(json_data.keys()):
-            raise ValueError("Field 'tracks' must exist in top level of music generation JSON file.")
+            errors.append("Field 'tracks' must exist in top level of music generation JSON file.")
         
         # check instruments
         instruments = json_data["instruments"]
         if (len(set(instruments.keys())) != len(list(instruments.keys()))):
-            raise ValueError("Duplicate instrument names cannot exist.")
+            errors.append("Duplicate instrument names cannot exist.")
         for instrument, partials in instruments.items():
             if (len(partials) == 0):
-                raise ValueError("At least one partial must exist for the instrument.")
+                errors.append("At least one partial must exist for the instrument.")
             for p, partial in enumerate(partials):
                 if (len(partial) != 2):
-                    raise ValueError("Partial must include [pitch_weight, amplitude_weight] only.")
+                    errors.append("Partial must include [pitch_weight, amplitude_weight] only.")
                 json_data["instruments"][instrument][p] = tuple(partial) # convert partial lists to tuples
-                if not isinstance(partial[0], float):
-                    raise TypeError("Pitch weight must be a float.")
-                if not isinstance(partial[1], float):
-                        raise TypeError("Amplitude weight must be a float.")
-                if not (0.0 <= partial[1] <= 1.0):
-                    raise ValueError("Amplitude weight must be normalized between 0.0 and 1.0.")
+                try:
+                    if not isinstance(partial[0], float):
+                        errors.append("Pitch weight must be a float.")
+                    if not isinstance(partial[1], float):
+                        errors.append("Amplitude weight must be a float.")
+                    if not (0.0 <= partial[1] <= 1.0):
+                        errors.append("Amplitude weight must be normalized between 0.0 and 1.0.")
+                except IndexError, TypeError:
+                    pass # error already handled by checking length
                 
         # check tracks
         tracks = json_data["tracks"]
@@ -49,13 +58,13 @@ class JsonParser:
 
             # keys
             if "name" not in list(track.keys()):
-                raise ValueError("Field 'name' must exist in all tracks.")
+                errors.append("Field 'name' must exist in all tracks.")
             if "instrument" not in list(track.keys()):
-                raise ValueError("Field 'instrument' must exist in all tracks.")
+                errors.append("Field 'instrument' must exist in all tracks.")
             if "dynamic" not in list(track.keys()):
-                raise ValueError("Field 'dynamic' must exist in all tracks.")
+                errors.append("Field 'dynamic' must exist in all tracks.")
             if "notes" not in list(track.keys()):
-                raise ValueError("Field 'notes' must exist in all tracks.")
+                errors.append("Field 'notes' must exist in all tracks.")
             
             # value types
             if not isinstance(track["name"], str):
@@ -70,11 +79,22 @@ class JsonParser:
                 if not isinstance(note, str):
                     raise TypeError("Track note must be a string value.")
                 
-            # ensure instruments match
+            # ensure instrument has been defined
+            if track["instrument"] not in list(instruments.keys()):
+                errors.append(f"Instrument '{track['instrument']}' must be defined in file.")
 
             # ensure correct note format
+            for note in track["notes"]:
+                if not re.fullmatch(r"([A-G])([b#]?)([0-8])([WHQES])(@(pp|mp|mf|ff|p|f))?", note):
+                    errors.append(f"Symbol must be note, flat or sharp, octave, duration, [@ dynamic]. (ex: Ab4W, B#3Q, C5E@pf)")
 
             # ensure nonempty track
+            if (len(track["notes"]) == 0):
+                errors.append("Track must have at least one note.")
 
-        return json_data
+            # raise errors
+            if (len(errors) > 0):
+                raise ValueError(errors)
+
+        return MusicFile(json_data)
 

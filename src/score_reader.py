@@ -54,7 +54,7 @@ class ScoreReader:
             raise ValueError("All musical notes must be string values.")
         
         if not re.fullmatch(r"([A-G])([b#]?)([0-8])([WHQES])(@(pp|mp|mf|ff|p|f))?", note):
-            raise ValueError("Symbol must be note, flat or sharp, octave, duration, [@ dynamic]. (ex: Ab4W, B#3Q, C5E@pf)")
+            raise ValueError(f"Symbol must be note, flat or sharp, octave, duration, [@ dynamic]. (ex: Ab4W, B#3Q, C5E@pf)")
 
         # extract pitch
         if ('b' in note or '#' in note):

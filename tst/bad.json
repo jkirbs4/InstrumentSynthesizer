@@ -1,0 +1,50 @@
+{
+  "instruments": {
+    "trumpet": [
+      [1.0],
+      [2.0, "0.9"],
+      ["3.0", 0.8],
+      [],
+      [1.0, 2.0, 3.0]
+    ],
+    "piano": [
+      
+    ],
+    "flute": {}
+  },
+  "tracks": [
+    {
+      "name": "Track A",
+      "instrument": "trumpet",
+      "dynamic": "mf",
+      "notes": [
+        "C4Q@mf", "H4Q@mf"
+      ]
+    },
+    {
+      "name": 1.0,
+      "instrument": 2.0,
+      "dynamic": 3.0,
+      "notes": 4.0
+    },
+    {
+      "field1": "Track C",
+      "field2": "flute",
+      "field3": "p",
+      "field4": [
+        "E5E@p", "G5E@p", "C6Q@mp", "G5Q@p",
+        "F5E@p", "A5E@p", "D6Q@mp", "A5Q@p",
+        "G5E@mp", "E5E@mp", "C5Q@p", "E5Q@mp",
+        "D5Q@p", "B4Q@p", "C5H@mf"
+      ]
+    },
+    {
+      "name": "Track D",
+      "instrument": "trumpets",
+      "dynamic": "mfa",
+      "notes": [
+
+      ]
+    }
+  ]
+}
