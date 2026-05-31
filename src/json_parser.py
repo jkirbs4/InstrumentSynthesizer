@@ -14,7 +14,6 @@ class JsonParser:
 
         return (dict): The dict representation of the .json file.
         """
-
         if not isinstance(filename, str):
             raise ValueError("Filename must be a string value.")
         if ".json" not in filename:

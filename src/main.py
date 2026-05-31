@@ -8,7 +8,7 @@ def main(filename: str):
     @param filename (str): The JSON file that describes the music.
     """
     # extract data from JSON
-    file_contents: dict = JsonParser.parse(filename)
+    music_file = JsonParser.parse(filename)
 
     # extract instruments and parse scores
     # combine instruments into one stream

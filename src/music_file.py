@@ -71,4 +71,15 @@ class MusicFile:
         for track in self.data["tracks"]:
             if (track["name"] == track_name):
                 return track["instrument"]
+            
+
+    def track_dynamic(self, track_name: str):
+        """
+        The dynamic corresponding to a track.
+
+        return (str): A dynamic.
+        """
+        for track in self.data["tracks"]:
+            if (track["name"] == track_name):
+                return track["dynamic"]
 
