@@ -6,6 +6,8 @@ class ScoreReader:
     def __init__(self, default_dynamic: str):
         """
         Configure the score reader's base behavior.
+
+        @param default_dynamic (str): The default loudness of a note if one is not defined for a note. 
         """
         self.DYNAMICS = {
             "pp": 0.20,
@@ -30,7 +32,7 @@ class ScoreReader:
         self.default_dynamic = default_dynamic
 
 
-    def read_score(self, score: list):
+    def read_score(self, score: list) -> list[tuple[str, float, float]]:
         """
         Read the notes of a score and parse information.
         
@@ -44,7 +46,7 @@ class ScoreReader:
         return [self._read_note(note) for note in score]
 
     
-    def _read_note(self, note: str):
+    def _read_note(self, note: str) -> tuple[str, float, float]:
         """
         Read a note and parse information 
 

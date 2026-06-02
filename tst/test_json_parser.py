@@ -32,14 +32,20 @@ def test_parse_correct_json():
 	]
 	assert music_file.track_names() == ["Track A", "Track B", "Track C"]
 	assert music_file.track_notes("Track A") == [
-		"C4Q@mf", "E4Q@mf", "G4Q@f", "E4Q@mf", "D4Q@mp", "F4Q@mf", "A4Q@f", "G4Q@mf", "E4Q@mf", "G4Q@f", "C5H@ff", "B4Q@mf", "A4Q@mf", "G4H@f"
-	]
+        "C4Q@mf", "E4Q@mf", "G4Q@f", "E4Q@mf",
+        "D4Q@mp", "F4Q@mf", "A4Q@f", "G4Q@mf",
+        "E4Q@mf", "G4Q@f", "C5H@ff", "A4Q@mf"
+      ]
 	assert music_file.track_notes("Track B") == [
-		"C3H@mp", "G3H@mp", "D3H@mp", "A3H@mp", "E3H@mp", "C4H@mp", "G2H@mf", "G3H@mf"
-	]
+        "C3H@mp", "G3H@mp", "E3Q@mf", "A3Q@mp",
+        "D3H@mp", "A3H@mp", "G4H@mf", "G4Q@mp",
+        "E3H@mp", "C4H@mp", "G2H@mf", "G3H@mf"
+      ]
 	assert music_file.track_notes("Track C") == [
-		"E5E@p", "G5E@p", "C6Q@mp", "G5Q@p", "F5E@p", "A5E@p", "D6Q@mp", "A5Q@p", "G5E@mp", "E5E@mp", "C5Q@p", "E5Q@mp", "D5Q@p", "B4Q@p", "C5H@mf"
-	]
+        "E5E@p", "G5E@p", "C6Q@mp", "G5Q@p",
+        "F5E@p", "A5E@p", "D6Q@mp", "A5Q@p",
+        "G5E@mp", "E5E@mp", "C5Q@p", "E5Q@mp"
+      ]
 	assert music_file.track_instrument("Track A") == "trumpet"
 	assert music_file.track_instrument("Track B") == "piano"
 	assert music_file.track_instrument("Track C") == "flute"
@@ -62,6 +68,7 @@ def test_parse_malformed_json():
 		'Amplitude weight must be normalized between 0.0 and 1.0.',
 		'At least one partial must exist for the instrument.',
 		'At least one partial must exist for the instrument.',
-		'Symbol must be note, flat or sharp, octave, duration, [@ dynamic]. (ex: Ab4W, B#3Q, C5E@pf)'
+		'Symbol must be note, flat or sharp, octave, duration, [@ dynamic]. (ex: Ab4W, B#3Q, C5E@pf)',
+		'All tracks must share the same length.'
 	]
 

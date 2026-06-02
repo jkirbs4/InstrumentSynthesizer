@@ -6,13 +6,13 @@ from src.music_file import MusicFile
 class JsonParser:
 
     @classmethod
-    def parse(cls, filename: str):
+    def parse(cls, filename: str) -> MusicFile:
         """
-        Parse a JSON file and convert to a python dict.
+        Parse a JSON file and pack it into a music file object.
 
         @param filename (str): The file name of a .json file.
 
-        return (dict): The dict representation of the .json file.
+        return (MusicFile): The packaged form of the .json file.
         """
         if not isinstance(filename, str):
             raise ValueError("Filename must be a string value.")
@@ -53,6 +53,7 @@ class JsonParser:
                 
         # check tracks
         tracks = json_data["tracks"]
+        track_lengths = set()
         for track in tracks:
 
             # keys
@@ -67,33 +68,39 @@ class JsonParser:
             
             # value types
             if not isinstance(track["name"], str):
-                raise TypeError("Track 'name' must be a string value.")
+                errors.append("Track 'name' must be a string value.")
             if not isinstance(track["instrument"], str):
-                raise TypeError("Track 'instrument' must be a string value.")
+                errors.append("Track 'instrument' must be a string value.")
             if not isinstance(track["dynamic"], str):
-                raise TypeError("Track 'dynamic' must be a string value.")
+                errors.append("Track 'dynamic' must be a string value.")
             if not isinstance(track["notes"], list):
-                raise TypeError("Track 'notes' must be a list of strings.")
-            for note in track["notes"]:
-                if not isinstance(note, str):
-                    raise TypeError("Track note must be a string value.")
+                errors.append("Track 'notes' must be a list of strings.")
+            else: # track["notes"] is a list
+                for note in track["notes"]:
+                    if not isinstance(note, str):
+                        errors.append("Track note must be a string value.")
+                    # ensure correct note format
+                    if not re.fullmatch(r"([A-G])([b#]?)([0-8])([WHQES])(@(pp|mp|mf|ff|p|f))?", note):
+                        errors.append(f"Symbol must be note, flat or sharp, octave, duration, [@ dynamic]. (ex: Ab4W, B#3Q, C5E@pf)")
                 
+                # ensure nonempty track
+                if (len(track["notes"]) == 0):
+                    errors.append("Track must have at least one note.")
+
+                # add to set for track length checking
+                track_lengths.add(len(track["notes"]))
+
             # ensure instrument has been defined
             if track["instrument"] not in list(instruments.keys()):
                 errors.append(f"Instrument '{track['instrument']}' must be defined in file.")
 
-            # ensure correct note format
-            for note in track["notes"]:
-                if not re.fullmatch(r"([A-G])([b#]?)([0-8])([WHQES])(@(pp|mp|mf|ff|p|f))?", note):
-                    errors.append(f"Symbol must be note, flat or sharp, octave, duration, [@ dynamic]. (ex: Ab4W, B#3Q, C5E@pf)")
+        # ensure tracks are all the same length
+        if (len(track_lengths) != 1):
+            errors.append("All tracks must share the same length.")
 
-            # ensure nonempty track
-            if (len(track["notes"]) == 0):
-                errors.append("Track must have at least one note.")
-
-            # raise errors
-            if (len(errors) > 0):
-                raise ValueError(errors)
+        # raise errors
+        if (len(errors) > 0):
+            raise ValueError(errors)
 
         return MusicFile(json_data)
 

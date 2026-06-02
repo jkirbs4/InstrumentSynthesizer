@@ -29,7 +29,13 @@ class PitchConverter:
 
     @classmethod
     def symbol_to_pitch(cls, symbol: str):
+        """
+        Convert a pitch symbol to a number.
 
+        @param symbol (str): The symbol corresponding to a specific pitch number.
+
+        return (str): A pitch number.
+        """
         if not re.fullmatch(r"([A-G])([b#]?)([0-8])", symbol):
             raise ValueError("Symbol must be note, [flat or sharp], octave. (ex: Ab4, B#3, C5)")
 

@@ -26,17 +26,27 @@ class Instrument:
         self.partials = partials
 
 
-    def __call__(self, score: list[str]):
+    def __call__(self, score: list[str]) -> list[Chord]:
+        """
+        Generate a sequence of chords according to the instrument type.
 
+        @param score (list[str]): A sequence of notes.
+
+        return (list[Chord]): A sequence of chords particular to the instrument.
+        """
         return self._generate_music(score)
     
 
-    def data(self):
+    def data(self) -> tuple[list[tuple[float, float]], str]:
+        """
+        Get the partials and default dynamic of the instrument.
 
+        return (tuple[list[tuple[float, float]]], [str])
+        """
         return (self.partials, self.score_reader.default_dynamic)
         
 
-    def _generate_music(self, score: list[str]):
+    def _generate_music(self, score: list[str]) -> list[Chord]:
         """
         Generate a sequence of chords according to the instrument type.
 
@@ -48,8 +58,16 @@ class Instrument:
         return [self._synthesize_note(pitch, duration, loudness) for pitch, duration, loudness in score_info]
     
 
-    def _synthesize_note(self, pitch: str, duration: float, loudness: float):
+    def _synthesize_note(self, pitch: str, duration: float, loudness: float) -> Chord:
+        """
+        Synthesize a note into a chord.
 
+        @param pitch (str): The base pitch of the note.
+        @param duration (float): The duration of the note.
+        @param loudness (float): The loudness of the note.
+
+        return (Chord): The synthesized chord. 
+        """
         base_frequency = PitchConverter.symbol_to_pitch(pitch)
 
         tones = [
