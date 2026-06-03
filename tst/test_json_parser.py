@@ -4,9 +4,13 @@ from src.json_parser import JsonParser
 from src.music_file import MusicFile
 
 
-def test_parse_correct_json():
+TEST_DIR = Path(__file__).parent
+INPUTS_DIR = TEST_DIR / "inputs"
 
-	json_path = str(Path(__file__).with_name("good.json"))
+
+def test_parse_correct_json():
+	
+	json_path = str(INPUTS_DIR / "good.json")
 	music_file = JsonParser.parse(json_path)
 	
 	# test music file attributes
@@ -35,17 +39,17 @@ def test_parse_correct_json():
         "C4Q@mf", "E4Q@mf", "G4Q@f", "E4Q@mf",
         "D4Q@mp", "F4Q@mf", "A4Q@f", "G4Q@mf",
         "E4Q@mf", "G4Q@f", "C5H@ff", "A4Q@mf"
-      ]
+    ]
 	assert music_file.track_notes("Track B") == [
         "C3H@mp", "G3H@mp", "E3Q@mf", "A3Q@mp",
         "D3H@mp", "A3H@mp", "G4H@mf", "G4Q@mp",
         "E3H@mp", "C4H@mp", "G2H@mf", "G3H@mf"
-      ]
+    ]
 	assert music_file.track_notes("Track C") == [
         "E5E@p", "G5E@p", "C6Q@mp", "G5Q@p",
         "F5E@p", "A5E@p", "D6Q@mp", "A5Q@p",
         "G5E@mp", "E5E@mp", "C5Q@p", "E5Q@mp"
-      ]
+    ]
 	assert music_file.track_instrument("Track A") == "trumpet"
 	assert music_file.track_instrument("Track B") == "piano"
 	assert music_file.track_instrument("Track C") == "flute"
@@ -54,21 +58,55 @@ def test_parse_correct_json():
 	assert music_file.track_dynamic("Track C") == "p"
 
 
-def test_parse_malformed_json():
+def test_parse_key_error_outer_json():
 
-	json_path = str(Path(__file__).with_name("bad.json"))
+	json_path = str(INPUTS_DIR / "key_error_outer.json")
+	with pytest.raises(KeyError) as error_info:
+		JsonParser.parse(json_path)
+	
+	assert error_info.value.args[0] == [
+		"Field 'instruments' must exist in top level of music generation JSON file.",
+		"Field 'tracks' must exist in top level of music generation JSON file."
+	]
+
+
+def test_parse_key_error_inner_json():
+
+	json_path = str(INPUTS_DIR / "key_error_inner.json")
+	with pytest.raises(KeyError) as error_info:
+		JsonParser.parse(json_path)
+	
+	assert error_info.value.args[0] == [
+        "Field 'name' must exist in all tracks.",
+        "Field 'instrument' must exist in all tracks.",
+        "Field 'dynamic' must exist in all tracks.",
+        "Field 'notes' must exist in all tracks."
+    ]
+
+
+def test_parse_value_error_json():
+
+	json_path = str(INPUTS_DIR / "value_error.json")
 	with pytest.raises(ValueError) as error_info:
 		JsonParser.parse(json_path)
 	
 	assert error_info.value.args[0] == [
-		'Partial must include [pitch_weight, amplitude_weight] only.',
-		'Amplitude weight must be a float.', 'Pitch weight must be a float.',
-		'Partial must include [pitch_weight, amplitude_weight] only.',
-		'Partial must include [pitch_weight, amplitude_weight] only.',
-		'Amplitude weight must be normalized between 0.0 and 1.0.',
-		'At least one partial must exist for the instrument.',
-		'At least one partial must exist for the instrument.',
-		'Symbol must be note, flat or sharp, octave, duration, [@ dynamic]. (ex: Ab4W, B#3Q, C5E@pf)',
-		'All tracks must share the same length.'
-	]
+    	"Partial must include [pitch_weight, amplitude_weight] only.",
+    	"Amplitude weight must be a float.",
+    	"Pitch weight must be a float.",
+        "Partial must include [pitch_weight, amplitude_weight] only.",
+        "Partial must include [pitch_weight, amplitude_weight] only.",
+        "Amplitude weight must be normalized between 0.0 and 1.0.",
+        "At least one partial must exist for the instrument.",
+        "At least one partial must exist for the instrument.",
+        "Symbol must be note, flat or sharp, octave, duration, [@ dynamic]. (ex: Ab4W, B#3Q, C5E@pf)",
+        "Track 'name' must be a string value.",
+        "Track 'instrument' must be a string value.",
+        "Track 'dynamic' must be a string value.",
+        "Track 'notes' must be a list of strings.",
+        "Instrument '2.0' must be defined in file.",
+        "Track must have at least one note.",
+        "Instrument 'trumpets' must be defined in file.",
+     	"All tracks must share the same length."
+    ] 
 
