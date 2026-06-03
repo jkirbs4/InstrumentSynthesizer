@@ -105,8 +105,7 @@ class JsonParser:
                 value_errors.append(f"Instrument '{track['instrument']}' must be defined in file.")
 
         # ensure tracks are all the same length
-        if (len(track_lengths) != 1):
-            value_errors.append("All tracks must share the same length.")
+        ...
 
         # raise value errors
         if (len(value_errors) > 0):

@@ -32,7 +32,7 @@ class SoundGenerator:
         elif (bit_depth == "32-bit"): self.sample_width = SAMP_WIDTH_32
 
         
-    def write_wav(self, filename: str, notes: list):
+    def write_wav(self, filename: str, notes: list) -> None:
         """
         Convert the music to the WAV file.
 
@@ -152,7 +152,7 @@ class SoundGenerator:
         return 1.0 # no scale for main segment of tone
     
 
-    def _write_sample(self, wav, sample: int):
+    def _write_sample(self, wav, sample: int) -> None:
         """
         Write a sample to the WAV file.
 

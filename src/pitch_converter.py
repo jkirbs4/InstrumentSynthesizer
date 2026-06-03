@@ -28,7 +28,7 @@ class PitchConverter:
     }
 
     @classmethod
-    def symbol_to_pitch(cls, symbol: str):
+    def symbol_to_pitch(cls, symbol: str) -> str:
         """
         Convert a pitch symbol to a number.
 

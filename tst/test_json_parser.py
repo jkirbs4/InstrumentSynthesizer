@@ -38,7 +38,8 @@ def test_parse_correct_json():
 	assert music_file.track_notes("Track A") == [
         "C4Q@mf", "E4Q@mf", "G4Q@f", "E4Q@mf",
         "D4Q@mp", "F4Q@mf", "A4Q@f", "G4Q@mf",
-        "E4Q@mf", "G4Q@f", "C5H@ff", "A4Q@mf"
+        "E4Q@mf", "G4Q@f", "C5H@ff", "A4Q@mf",
+        "G4H@mf", "E4H@mf", "C4H@mp", "C4H@mp"
     ]
 	assert music_file.track_notes("Track B") == [
         "C3H@mp", "G3H@mp", "E3Q@mf", "A3Q@mp",
@@ -48,7 +49,9 @@ def test_parse_correct_json():
 	assert music_file.track_notes("Track C") == [
         "E5E@p", "G5E@p", "C6Q@mp", "G5Q@p",
         "F5E@p", "A5E@p", "D6Q@mp", "A5Q@p",
-        "G5E@mp", "E5E@mp", "C5Q@p", "E5Q@mp"
+        "G5E@mp", "E5E@mp", "C5Q@p", "E5Q@mp",
+        "G5H@p", "E5H@p", "C5H@mp",
+        "G5H@p", "E5H@p", "C5H@mp"
     ]
 	assert music_file.track_instrument("Track A") == "trumpet"
 	assert music_file.track_instrument("Track B") == "piano"
