@@ -1,14 +1,22 @@
 # InstrumentSynthesizer
 An open source tool to convert musical scores represented by `.json` files to `.wav` audio format. Define instruments based on custom harmonics and timbres
 
+<div align="center">
+  <img width="600" alt="image" src="https://github.com/user-attachments/assets/3fc7d7c3-f3b6-47ac-9d1a-f523be834abc" />
+</div>
+
 ---
 ## Helpful Definitions
-
+- **_Sinusoid:_** A sine waveform that is continuous, periodic, and can be defined by an amplitude, phase shift, and frequency.
 - **_Fundamental Frequency:_** The frequency that serves as a base freqency in which harmonics and timbre stem off of. A note 'owns' a specific frequency, but instruments by definition play a collection of frequencies. The fundamental frequency is processed to produce this set of output frequencies.
 - **_Harmonics:_** Integer frequencies that are integer multiples of a fundamental frequency.
 - **_Timbre:_** The percieved color or quality of a sound which makes different instruments and vocals distinguishable from one another.
 - **_Partials:_** Variations of the fundamental frequency described by scaled frequencies paired with amplitude scales to apply a weight. When integer multiples of the fundamental frequency are applied as partials, harmonics are created. A critical factor in creating timbre is by applying appropriate weights to these derived frequencies.
+- **_Superposition:_** The act of summing sinusoides to create a composite sinusoid.
+- **_Decomposition:_** The act of breaking down a composite sinusoid into base sinusoids that cannot be further decomposed.
 - **_Chord:_** When multiple musical notes are played together, a harmonious sound is generated. This can be digitally replicated by superimposing waveforms that correspond to partials to create a composite waveform. In addition to a loudness defined by the waveforms amplitude and the sound defined by the embedded frequencies, a chord has a duration.
+- **_ADC:_** An analog-to-digital converter is a mechanism that transforms real world continuous signals to discrete signals in the virtual world.
+- **_DAC:_** A digital-to-analog converter is a mechanism that transforms discrete signals in the virtual world to continuous signals in the real world.
 
 ---
 ## Music Files
@@ -77,7 +85,7 @@ The `InstrumentSynthesizer` tool ingests `.json` files as input, processes them,
 It is important to make some noteworthy observations regarding this music file:
 - **Top-Level Hierarchy:** Everything within the file exists within an object with two keys, which are `"instruments"` and `"tracks"`.
 - **Instrument Definition:** The `"instruments"` key refers to the object in which a nonempty collection of sound generation tools can be defined. Each instrument must be defined with a unique key with a value as an array of arrays. The subarrays represent partials defined by ordered pairs of `[pitch_weight, amplitude_weight]`. These values are multiplied by the fundamental frequency and amplitude of each note to produce the instrument's unique sound.
-- **Track Definition:** Tracks utilize the defined instruments to create sequences of sound, serving as a programatic musical score. Each track has a `"name"` which serves as a unique identifier. Tracks are assigned a single `"instrument"` from the existing bank of instruments already defined. A default `"dynamic"` is assigned which corresponds to the loudness assigned to each note if a specific loudness is not explicitly provided. Most importantly, the sequence of `"notes"` is structured as an array of string values.
+- **Track Definition:** Tracks utilize the defined instruments to create sequences of sound, serving as a programatic musical score. Each track has a `"name"` which serves as a unique identifier. Tracks are assigned a single `"instrument"` from the existing bank of instruments already defined. A default `"dynamic"` is assigned which corresponds to the loudness assigned to each note if a specific loudness is not explicitly provided. Most importantly, the sequence of `"notes"` is structured as an array of string values. It is important not to add any more keys or structure to the `.json` file. If any violation is detected by the parser, an error will be raised and the `.wav` file will not be generated.
 
 ### Note Syntax
 A note within `"notes"` is represented as a string value consisting of a letter pitch, an optional flat or sharp, an octave number, the duration, and lastly an optional dynamic specifier. It is specifically recognized by the regular expression `"([A-G])([b#]?)([0-8])([WHQES])(@(pp|mp|mf|ff|p|f))?"`. A flat is represented with the character `"b"` and a sharp is represented by the character `"#"`. Nine octaves are achievable `0-9`, where each step up applies double the pitch. Five potential durations may be selected from, which are represented by the characters `"W"` for a whole note, `"H"` for a half note, `"Q"` for a quarter note, `"E"` for a eighth note, and `"S"` for a sixteenth note. The dynamics and their weight scales are presented below in tabular form:
@@ -124,14 +132,39 @@ A note within `"notes"` is represented as a string value consisting of a letter 
 
 </div>
 
+The dynamic must succeed a `"@"` character to communicate to the parser correctly. This pattern must be applied to both individual notes and the base `"dynamic"` key defined for a track.
+
 ---
 ## Chord Implementation
+
+Chords exist when multiple tones are played simultaneously, but how exactly can this be created digitaly? First, it must be acknowledged what a wave is and how to represent it mathematically. The equation of a sinusoid is $y(t) = A \sin(2\pi f t + \phi)$ where $A$ is the amplitude, $f$ is the frequency, $t$ is time, and $\phi$ is the phase shift.
+
+<div align="center">
+  <img width="600" height="450" alt="image" src="https://github.com/user-attachments/assets/f9b822ea-3df0-4b80-befa-9b6f3c9f00ce" />
+  <br>
+  <em>A graph of a standard sinusoidal function.</em>
+</div>
+
+Second, the base concept of a Fourier Transform must be understood, which is that any complex wave can ultimately be decomposed into a sum of sinusoids. This transform is described by the equation $x(t) = \int_{-\infty}^{\infty} X(f)e^{i2\pi ft}\df$, but will not be directly used for the digital synthesis of sound. As described above, pitch names `A-G` are interpreted by instruments which use a collection of partials to create harmony and timbre. These partials help create new waveforms that stem from the fundamental frequency provided to the instrument which are superimposed to create a composite waveform. After `InstrumentSynthesizer` performs further processing, each track is merged together and the composite sinusoids are again superimposed. 
 
 <div align="center">
   <img width="600" height="450" alt="image" src="https://github.com/user-attachments/assets/47f50ef5-e028-46fb-8087-53605d443dfc" />
   <br>
   <em>A superposition of two waves forming a resulting waveform.</em>
 </div>
+
+Third, it is important to understand the rules of sampling. The Nyquist–Shannon sampling theorem states that a continuous signal can be converted into a digital signal if the sample rate is at least double the highest frequency of the sinusoid. Also, an analog waveform can be reconstructed from a digital signal that has been sampled as such. The formula for this theorem is $f_s > 2f_{max}$ where $f_s$ is the sampling rate frequency and $f$ is the highest frequency in a the composite sinusoid being sampled from. Human hearing receives upper frequencies of around 20,000Hz. This implies that the sampling rate must equal 40,000Hz by applying the formula. In practice, `InstrumentSynthesizer` uses a default sampling rate of 40,100Hz to account for some error in the `SoundGenerator` class. This is the first and most crucial step of the ADC (Analog-to-digital) conversion process.
+
+<div align="center">
+  <img width="600" height="450" alt="image" src="https://github.com/user-attachments/assets/78de66dd-e36b-4cf0-a6af-233af9489ae8" />
+  <br>
+  <em>The Nyquist-Shannon sampling theorem visualized.</em>
+</div>
+
+Fourth, the sampled values must be quantized. Quantization involves subjecting each sample to a discrete amplitude level. The number of levels is defined by the `bit_depth` of the audio. Four depths are supported by `InstrumentSynthesizer`, which are 8-bit, 16-bit, 24-bit, and 32-bit. A greater `bit_depth` produces a smoother and more granular sound while a lower level sounds more grainy and less precise.
+
+
+Fifth, the quantized samples must be encoded into binary values that can be written to a `.wav` file.
 
 ---
 This project is licensed under the MIT License. See the LICENSE file for details.
