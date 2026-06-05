@@ -3,10 +3,13 @@ import math
 import struct
 import os
 
-INT_MIN_8, INT_MAX_8 = -128, 127
-INT_MIN_16, INT_MAX_16 = -32768, 32767
-INT_MIN_24, INT_MAX_24 = -8388608, 8388607 
-INT_MIN_32, INT_MAX_32 = -2147483648, 2147483647
+INT_MAX_8 = 127
+INT_MAX_16 = 32767
+INT_MAX_24 = 8388607 
+INT_MAX_32 = 2147483647
+INT_MIN_16 = -32768
+INT_MIN_24 = -8388608
+INT_MIN_32 = -2147483648
 
 SAMP_WIDTH_8 = 1
 SAMP_WIDTH_16 = 2
@@ -101,7 +104,7 @@ class SoundGenerator:
 
     def _sample_to_int(self, sample: float) -> int:
         """
-        Convert a sample to integer form according to the width.
+        Quantize a sample to integer form according to the width.
 
         @param sample (float): The computed sample from the sine wave.
 

@@ -8,7 +8,7 @@ TEST_DIR = Path(__file__).parent
 INPUTS_DIR = TEST_DIR / "inputs"
 
 
-def test_parse_correct_json():
+def test_correct_json():
 	
 	json_path = str(INPUTS_DIR / "good.json")
 	music_file = JsonParser.parse(json_path)
@@ -61,7 +61,7 @@ def test_parse_correct_json():
 	assert music_file.track_dynamic("Track C") == "p"
 
 
-def test_parse_key_error_outer_json():
+def test_key_error_outer_json():
 
 	json_path = str(INPUTS_DIR / "key_error_outer.json")
 	with pytest.raises(KeyError) as error_info:
@@ -73,7 +73,7 @@ def test_parse_key_error_outer_json():
 	]
 
 
-def test_parse_key_error_inner_json():
+def test_key_error_inner_json():
 
 	json_path = str(INPUTS_DIR / "key_error_inner.json")
 	with pytest.raises(KeyError) as error_info:
@@ -87,9 +87,9 @@ def test_parse_key_error_inner_json():
     ]
 
 
-def test_parse_value_error_json():
+def test_value_error_general_json():
 
-	json_path = str(INPUTS_DIR / "value_error.json")
+	json_path = str(INPUTS_DIR / "value_error_general.json")
 	with pytest.raises(ValueError) as error_info:
 		JsonParser.parse(json_path)
 	
@@ -110,6 +110,16 @@ def test_parse_value_error_json():
         "Instrument '2.0' must be defined in file.",
         "Track must have at least one note.",
         "Instrument 'trumpets' must be defined in file.",
-     	"All tracks must share the same length."
+     	"All tracks must share the same length. Be sure that note durations sum to the same total duration for all tracks.\nTrack Lengths = [8, 0, 0]"
     ] 
 
+
+def test_value_error_track_length():
+
+	json_path = str(INPUTS_DIR / "value_error_track_length.json")
+	with pytest.raises(ValueError) as error_info:
+		JsonParser.parse(json_path)
+
+	assert error_info.value.args[0] == [
+    	"All tracks must share the same length. Be sure that note durations sum to the same total duration for all tracks.\nTrack Lengths = [84, 84, 76]"
+    ] 

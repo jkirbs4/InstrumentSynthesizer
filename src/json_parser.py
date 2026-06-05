@@ -59,8 +59,19 @@ class JsonParser:
                 
         # check tracks
         tracks = json_data["tracks"]
-        track_lengths = set()
-        for track in tracks:
+        track_lengths = [] # store length for each track
+        track_length_scores = { # score proportionate lengths for each note
+            "W": 16,
+            "H": 8,
+            "Q": 4,
+            "E": 2,
+            "S": 1
+        }
+        duration_chars = "WHQES"
+
+        for t, track in enumerate(tracks):
+
+            track_lengths.append(0) # initialize next track length score
 
             # keys
             if "name" not in list(track.keys()):
@@ -92,20 +103,23 @@ class JsonParser:
                     # ensure correct note format
                     if not re.fullmatch(r"([A-G])([b#]?)([0-8])([WHQES])(@(pp|mp|mf|ff|p|f))?", note):
                         value_errors.append(f"Symbol must be note, flat or sharp, octave, duration, [@ dynamic]. (ex: Ab4W, B#3Q, C5E@pf)")
-                
+                    for char in note:
+                        if char in duration_chars:
+                            duration_char = char
+                    track_lengths[t] += track_length_scores[duration_char] # accumulate track length score
+
                 # ensure nonempty track
                 if (len(track["notes"]) == 0):
                     value_errors.append("Track must have at least one note.")
-
-                # add to set for track length checking
-                track_lengths.add(len(track["notes"]))
 
             # ensure instrument has been defined
             if track["instrument"] not in list(instruments.keys()):
                 value_errors.append(f"Instrument '{track['instrument']}' must be defined in file.")
 
         # ensure tracks are all the same length
-        ...
+        if (len(set(track_lengths)) != 1):
+            value_errors.append("All tracks must share the same length. Be sure that note durations sum to the same total duration for all tracks.\n"
+            f"Track Lengths = {track_lengths}")
 
         # raise value errors
         if (len(value_errors) > 0):
