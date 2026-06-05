@@ -31,6 +31,8 @@ class JsonParser:
             key_errors.append("Field 'instruments' must exist in top level of music generation JSON file.")
         if not "tracks" in list(json_data.keys()):
             key_errors.append("Field 'tracks' must exist in top level of music generation JSON file.")
+        if not (len(list(json_data.keys())) == 2):
+            key_errors.append("First level fields must only be 'instruments' and 'tracks'.")
 
         # raise key errors
         if (len(key_errors) > 0):
@@ -68,6 +70,7 @@ class JsonParser:
             "S": 1
         }
         duration_chars = "WHQES"
+        track_names = [] # to check for unique track names
 
         for t, track in enumerate(tracks):
 
@@ -90,6 +93,7 @@ class JsonParser:
             # value types
             if not isinstance(track["name"], str):
                 value_errors.append("Track 'name' must be a string value.")
+            track_names.append(track["name"])
             if not isinstance(track["instrument"], str):
                 value_errors.append("Track 'instrument' must be a string value.")
             if not isinstance(track["dynamic"], str):
@@ -115,6 +119,10 @@ class JsonParser:
             # ensure instrument has been defined
             if track["instrument"] not in list(instruments.keys()):
                 value_errors.append(f"Instrument '{track['instrument']}' must be defined in file.")
+
+        # ensure track names are unique
+        if (len(track_names) != len(set(track_names))):
+            value_errors.append("Tracks must have unique names.")
 
         # ensure tracks are all the same length
         if (len(set(track_lengths)) != 1):

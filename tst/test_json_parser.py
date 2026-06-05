@@ -69,7 +69,8 @@ def test_key_error_outer_json():
 	
 	assert error_info.value.args[0] == [
 		"Field 'instruments' must exist in top level of music generation JSON file.",
-		"Field 'tracks' must exist in top level of music generation JSON file."
+		"Field 'tracks' must exist in top level of music generation JSON file.",
+		"First level fields must only be 'instruments' and 'tracks'."
 	]
 
 
@@ -110,6 +111,7 @@ def test_value_error_general_json():
         "Instrument '2.0' must be defined in file.",
         "Track must have at least one note.",
         "Instrument 'trumpets' must be defined in file.",
+		"Tracks must have unique names.",
      	"All tracks must share the same length. Be sure that note durations sum to the same total duration for all tracks.\nTrack Lengths = [8, 0, 0]"
     ] 
 

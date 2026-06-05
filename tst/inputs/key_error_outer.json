@@ -15,5 +15,15 @@
         "C4Q@mf", "G4Q@mf"
       ]
     }
+  ],
+  "key3": [
+    {
+      "name": "Track B",
+      "instrument": "trumpet",
+      "dynamic": "mf",
+      "notes": [
+        "C4Q@mf", "G4Q@mf"
+      ]
+    }
   ]
 }
