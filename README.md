@@ -15,8 +15,8 @@ An open source tool to convert musical scores represented by `.json` files to `.
 - **_Superposition:_** The act of summing sinusoides to create a composite sinusoid.
 - **_Decomposition:_** The act of breaking down a composite sinusoid into base sinusoids that cannot be further decomposed.
 - **_Chord:_** When multiple musical notes are played together, a harmonious sound is generated. This can be digitally replicated by superimposing waveforms that correspond to partials to create a composite waveform. In addition to a loudness defined by the waveforms amplitude and the sound defined by the embedded frequencies, a chord has a duration.
-- **_ADC:_** An analog-to-digital converter is a mechanism that transforms real world continuous signals to discrete signals in the virtual world.
-- **_DAC:_** A digital-to-analog converter is a mechanism that transforms discrete signals in the virtual world to continuous signals in the real world.
+- **_ADC:_** An analog-to-digital converter is a mechanism that transforms real world continuous signals to discrete signals in the virtual world by sampling, quantization, and encoding. This mechanism is built in to the audio codec chip on a modern computer's motherboard.
+- **_DAC:_** A digital-to-analog converter is a mechanism that transforms discrete signals in the virtual world to continuous signals in the real world. It operates by generating voltages that map to a binary stream. This mechanism is built in to the audio codec chip on a modern computer's motherboard.
 
 ---
 ## Music Files
@@ -144,27 +144,86 @@ Chords exist when multiple tones are played simultaneously, but how exactly can 
   <br>
   <em>A graph of a standard sinusoidal function.</em>
 </div>
+<br>
 
-Second, the base concept of a Fourier Transform must be understood, which is that any complex wave can ultimately be decomposed into a sum of sinusoids. This transform is described by the equation $x(t) = \int_{-\infty}^{\infty} X(f)e^{i2\pi ft}\df$, but will not be directly used for the digital synthesis of sound. As described above, pitch names `A-G` are interpreted by instruments which use a collection of partials to create harmony and timbre. These partials help create new waveforms that stem from the fundamental frequency provided to the instrument which are superimposed to create a composite waveform. After `InstrumentSynthesizer` performs further processing, each track is merged together and the composite sinusoids are again superimposed. 
+Second, the base concept of a Fourier Transform must be understood, which is that any complex wave can ultimately be decomposed into a sum of sinusoids. This transform is described by the equation $x(t) = \int_{-\infty}^{\infty} X(f)e^{i2\pi ft}\df$, but will not be directly used for the digital synthesis of sound. As described above, pitch names `A-G` are interpreted by instruments which use a collection of partials to create harmony and timbre. These partials help create new waveforms that stem from the fundamental frequency provided to the instrument which are superimposed to create a composite waveform. After `InstrumentSynthesizer` performs further processing, each track is merged together and the quantized samples of the composite sinusoids are superimposed. This is so that sound data from all tracks is elogantly overlayed at the proper time when writing the samples to the binary `.wav` file.
 
 <div align="center">
   <img width="600" height="450" alt="image" src="https://github.com/user-attachments/assets/47f50ef5-e028-46fb-8087-53605d443dfc" />
   <br>
   <em>A superposition of two waves forming a resulting waveform.</em>
 </div>
+<br>
 
-Third, it is important to understand the rules of sampling. The Nyquist–Shannon sampling theorem states that a continuous signal can be converted into a digital signal if the sample rate is at least double the highest frequency of the sinusoid. Also, an analog waveform can be reconstructed from a digital signal that has been sampled as such. The formula for this theorem is $f_s > 2f_{max}$ where $f_s$ is the sampling rate frequency and $f$ is the highest frequency in a the composite sinusoid being sampled from. Human hearing receives upper frequencies of around 20,000Hz. This implies that the sampling rate must equal 40,000Hz by applying the formula. In practice, `InstrumentSynthesizer` uses a default sampling rate of 40,100Hz to account for some error in the `SoundGenerator` class. This is the first and most crucial step of the ADC (Analog-to-digital) conversion process.
+Third, it is important to understand the rules of sampling. The Nyquist–Shannon sampling theorem states that a continuous signal can be converted into a digital signal if the sample rate is at least double the highest frequency of the sinusoid. Also, an analog waveform can be reconstructed from a digital signal that has been sampled as such. The formula for this theorem is $f_s > 2f_{max}$ where $f_s$ is the sampling rate frequency and $f$ is the highest frequency in a the composite sinusoid being sampled from. Human hearing receives upper frequencies of around 20,000Hz. This implies that the sampling rate must equal 40,000Hz by applying the formula. In practice, `InstrumentSynthesizer` uses a default sampling rate of 40,100Hz to account for some error in the `SoundGenerator` class. This is the first and most crucial step of the ADC (Analog-to-Digital) conversion process.
 
 <div align="center">
   <img width="600" height="450" alt="image" src="https://github.com/user-attachments/assets/78de66dd-e36b-4cf0-a6af-233af9489ae8" />
   <br>
   <em>The Nyquist-Shannon sampling theorem visualized.</em>
 </div>
+<br>
 
-Fourth, the sampled values must be quantized. Quantization involves subjecting each sample to a discrete amplitude level. The number of levels is defined by the `bit_depth` of the audio. Four depths are supported by `InstrumentSynthesizer`, which are 8-bit, 16-bit, 24-bit, and 32-bit. A greater `bit_depth` produces a smoother and more granular sound while a lower level sounds more grainy and less precise.
+Fourth, the sampled values must be quantized. Quantization involves subjecting each sample to a discrete amplitude level. The number of levels is defined by the `bit_depth` of the audio. Four depths are supported by `InstrumentSynthesizer`, which are 8-bit, 16-bit, 24-bit, and 32-bit. A greater `bit_depth` produces a smoother and more granular sound while a lower level sounds more grainy and less articulate. Since samples from a sinusoid are normalized within the continuous range of $[0.0, 1.0]$, multiplication by the maximum integer can be applied to this range to span a new range with greater processable granularity.
 
+<div align="center">
 
-Fifth, the quantized samples must be encoded into binary values that can be written to a `.wav` file.
+<table>
+  <thead>
+    <tr>
+      <th>Integer Type</th>
+      <th>Number of Possible Values</th>
+      <th>Minimum</th>
+      <th>Maximum</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>8-bit</td>
+      <td>2<sup>8</sup></td>
+      <td>0</td>
+      <td>255</td>
+    </tr>
+    <tr>
+      <td>16-bit</td>
+      <td>2<sup>16</sup></td>
+      <td>0</td>
+      <td>65,535</td>
+    </tr>
+    <tr>
+      <td>24-bit</td>
+      <td>2<sup>24</sup></td>
+      <td>0</td>
+      <td>16,777,215</td>
+    </tr>
+    <tr>
+      <td>32-bit</td>
+      <td>2<sup>32</sup></td>
+      <td>0</td>
+      <td>4,294,967,295</td>
+    </tr>
+  </tbody>
+</table>
+
+</div>
+
+Fifth, the samples from each track must be superimposed by summing integer arrays, then each element must be re-normalized to be between zero and the maximum value. This adds further complexity by summing already composite waveforms, but is critical to be able to write the data for all instruments to the `.wav` file in a single stream. Tracks must be superimposed at the sample level rather than at the `Chord` object level because chord durations may not be equivalent, leading to disalignment.
+
+<div align="center">
+  <img width="600" height="350" alt="image" src="https://github.com/user-attachments/assets/861ac172-d7de-45b2-99d6-e997e3583d4f" />
+  <br>
+  <em>Superposition and re-normalization of audio sample arrays.</em>
+</div>
+<br>
+
+Sixth, the final stage of ADC must be applied as quantized samples must be encoded into binary values that can be written to a `.wav` file. At this stage of the processing pipeline, each sample integer now contains the information of all instruments at a given time step. These samples can be written in binary to the audio file which can be played back by a computer. Modern computers have a `audio codec chip` on the motherboard with a built-in DAC to play the audio.
+
+<div align="center">
+  <img width="600" height="350" alt="image" src="https://github.com/user-attachments/assets/c6e2c24e-98b1-4116-aab7-ab5ff0f22357" />
+  <br>
+  <em>Superposition and re-normalization of audio sample arrays.</em>
+</div>
+<br>
 
 ---
 This project is licensed under the MIT License. See the LICENSE file for details.
