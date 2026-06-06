@@ -31,8 +31,10 @@ class JsonParser:
             key_errors.append("Field 'instruments' must exist in top level of music generation JSON file.")
         if not "tracks" in list(json_data.keys()):
             key_errors.append("Field 'tracks' must exist in top level of music generation JSON file.")
-        if not (len(list(json_data.keys())) == 2):
-            key_errors.append("First level fields must only be 'instruments' and 'tracks'.")
+        if not "tempo" in list(json_data.keys()):
+            key_errors.append("Field 'tempo' must exist in top level of music generation JSON file.")
+        if not (len(list(json_data.keys())) == 3):
+            key_errors.append("First level fields must only be 'instruments', 'tracks', and 'tempo'.")
 
         # raise key errors
         if (len(key_errors) > 0):
@@ -58,6 +60,13 @@ class JsonParser:
                         value_errors.append("Amplitude weight must be normalized between 0.0 and 1.0.")
                 except IndexError, TypeError:
                     pass # error already handled by checking length
+
+        # check tempo
+        tempo = json_data["tempo"]
+        if not isinstance(tempo, int):
+            value_errors.append("Tempo must be an integer value.")
+        if (tempo <= 0):
+            value_errors.append("Tempo must be a positive value.")
                 
         # check tracks
         tracks = json_data["tracks"]

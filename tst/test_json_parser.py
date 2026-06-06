@@ -8,7 +8,7 @@ TEST_DIR = Path(__file__).parent
 INPUTS_DIR = TEST_DIR / "inputs"
 
 
-def test_correct_json():
+def test_correct():
 	
 	json_path = str(INPUTS_DIR / "good.json")
 	music_file = JsonParser.parse(json_path)
@@ -61,7 +61,7 @@ def test_correct_json():
 	assert music_file.track_dynamic("Track C") == "p"
 
 
-def test_key_error_outer_json():
+def test_key_error_outer():
 
 	json_path = str(INPUTS_DIR / "key_error_outer.json")
 	with pytest.raises(KeyError) as error_info:
@@ -70,11 +70,12 @@ def test_key_error_outer_json():
 	assert error_info.value.args[0] == [
 		"Field 'instruments' must exist in top level of music generation JSON file.",
 		"Field 'tracks' must exist in top level of music generation JSON file.",
-		"First level fields must only be 'instruments' and 'tracks'."
+		"Field 'tempo' must exist in top level of music generation JSON file.",
+		"First level fields must only be 'instruments', 'tracks', and 'tempo'."
 	]
 
 
-def test_key_error_inner_json():
+def test_key_error_inner():
 
 	json_path = str(INPUTS_DIR / "key_error_inner.json")
 	with pytest.raises(KeyError) as error_info:
@@ -88,7 +89,7 @@ def test_key_error_inner_json():
     ]
 
 
-def test_value_error_general_json():
+def test_value_error_general():
 
 	json_path = str(INPUTS_DIR / "value_error_general.json")
 	with pytest.raises(ValueError) as error_info:
@@ -103,6 +104,7 @@ def test_value_error_general_json():
         "Amplitude weight must be normalized between 0.0 and 1.0.",
         "At least one partial must exist for the instrument.",
         "At least one partial must exist for the instrument.",
+		"Tempo must be a positive value.",
         "Symbol must be note, flat or sharp, octave, duration, [@ dynamic]. (ex: Ab4W, B#3Q, C5E@pf)",
         "Track 'name' must be a string value.",
         "Track 'instrument' must be a string value.",
@@ -123,5 +125,6 @@ def test_value_error_track_length():
 		JsonParser.parse(json_path)
 
 	assert error_info.value.args[0] == [
+		"Tempo must be an integer value.",
     	"All tracks must share the same length. Be sure that note durations sum to the same total duration for all tracks.\nTrack Lengths = [84, 84, 76]"
     ] 
