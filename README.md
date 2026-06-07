@@ -135,7 +135,14 @@ A note within `"notes"` is represented as a string value consisting of a letter 
 The dynamic must succeed a `"@"` character to communicate to the parser correctly. This pattern must be applied to both individual notes and the base `"dynamic"` key defined for a track.
 
 ---
-## Chord Implementation
+## Chord Implementation and Processing
+
+<div align="center">
+  <img width="900" height="350" alt="image" src="https://github.com/user-attachments/assets/c1e0b866-0279-44b2-af2d-2ed88d040edf" />
+  <br>
+  <em>The signal processing flow of a chord.</em>
+</div>
+<br>
 
 Chords exist when multiple tones are played simultaneously, but how exactly can this be created digitaly? First, it must be acknowledged what a wave is and how to represent it mathematically. The equation of a sinusoid is $y(t) = A \sin(2\pi f t + \phi)$ where $A$ is the amplitude, $f$ is the frequency, $t$ is time, and $\phi$ is the phase shift.
 
