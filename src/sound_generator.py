@@ -89,17 +89,20 @@ class SoundGenerator:
         quantized_samples: dict[str, list[int]] = {}
 
         for track_name in music_file.track_names():
-            quantized_samples[track_name] = []
+            track_samples: list[int] = []
             track_chords = music_file.track_chords(track_name)
 
-            # elapsed_exact_samples = 0.0
-            # rendered_samples = 0
+            elapsed_exact_samples = 0.0
+            rendered_samples = 0
 
             for chord in track_chords:
                 tones = chord.tones()
-                samples = self._note_sample_count(chord.get_duration())
 
-                for s in range(samples):
+                elapsed_exact_samples += self.sample_rate * chord.get_duration()
+                next_rendered_samples = round(elapsed_exact_samples)
+                chord_sample_count = next_rendered_samples - rendered_samples
+
+                for s in range(chord_sample_count):
                     time = self._current_time(s, self.sample_rate) # how far into the sound we are
                     sample = 0.0
                     active_tones = 0
@@ -114,7 +117,11 @@ class SoundGenerator:
                     if active_tones > 0:
                         sample /= active_tones
 
-                    quantized_samples[track_name].append(self._sample_to_int(sample)) # make the sample discrete and add to list
+                    track_samples.append(self._sample_to_int(sample)) # make the sample discrete
+                
+                rendered_samples = next_rendered_samples
+
+            quantized_samples[track_name] = track_samples
         
         return quantized_samples
     
@@ -127,11 +134,9 @@ class SoundGenerator:
 
         return (list[int]): The condensed samples.
         """
-        samples = []
         first_key = next(iter(quantized_samples))
         sample_count = len(quantized_samples[first_key])
-        for s in range(sample_count): # initialize all samples to zero
-            samples.append(0)
+        samples = [0] * sample_count # initialize all samples to zero
 
         for track in list(quantized_samples.keys()): # accumulate sample values
             for s, sample in enumerate(quantized_samples[track]):
@@ -204,17 +209,6 @@ class SoundGenerator:
         elif self.sample_width == SAMP_WIDTH_32:
             sample_int = int(sample * INT_MAX_32)
             return max(INT_MIN_32, min(INT_MAX_32, sample_int))
-    
-
-    def _note_sample_count(self, duration: float) -> int:
-        """
-        Get the number of samples.
-
-        @param duration (float): The length of the tone.
-
-        return (int): The number of samples.
-        """
-        return int(self.sample_rate * duration)
     
 
     def _envelope(self, time: float, duration: float, fade_time: float = 0.02) -> float:
