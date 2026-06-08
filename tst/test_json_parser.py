@@ -104,7 +104,7 @@ def test_key_error_outer():
 		"Field 'instruments' must exist in top level of music generation JSON file.",
 		"Field 'tracks' must exist in top level of music generation JSON file.",
 		"Field 'tempo' must exist in top level of music generation JSON file.",
-		"First level fields must only be 'instruments', 'tracks', and 'tempo'."
+		"First level fields must only be 'instruments', 'tracks', 'bit-depth', and 'tempo'."
 	]
 
 
@@ -137,6 +137,7 @@ def test_value_error_general():
         "Amplitude weight must be normalized between 0.0 and 1.0.",
         "At least one partial must exist for the instrument.",
         "At least one partial must exist for the instrument.",
+		"Tempo must be of string values '8-bit', '16-bit', '24-bit', or '32-bit'.",
 		"Tempo must be a positive value.",
         "Symbol must be note, flat or sharp, octave, duration, [@ dynamic]. (ex: Ab4W, B#3Q, C5E@pf)",
         "Track 'name' must be a string value.",
@@ -158,6 +159,7 @@ def test_value_error_track_length():
 		JsonParser.parse(json_path)
 
 	assert error_info.value.args[0] == [
+		"Tempo must be of string values '8-bit', '16-bit', '24-bit', or '32-bit'.",
 		"Tempo must be an integer value.",
     	"All tracks must share the same length. Be sure that note durations sum to the same total duration for all tracks.\nTrack Lengths = [84, 84, 76]"
     ] 

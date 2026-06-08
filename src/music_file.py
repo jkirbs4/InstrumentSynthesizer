@@ -25,6 +25,33 @@ class MusicFile:
                 
         self.data["tracks"][t]["chords"] = chords
 
+
+    def sample_rate(self) -> int:
+        """
+        Get the sample rate to synthesize with.
+
+        return (int): The rate at which to sample the waves.
+        """
+        return self.data["sample-rate"]
+
+
+    def bit_depth(self) -> str:
+        """
+        Get the bit depth to synthesize with.
+
+        return (str): The bit depth.
+        """
+        return self.data["bit-depth"]
+
+
+    def tempo(self) -> int:
+        """
+        Get the tempo of the music file.
+
+        return (int): The tempo in BPM.
+        """
+        return self.data["tempo"]
+
     
     def instruments(self) -> list[str]:
         """

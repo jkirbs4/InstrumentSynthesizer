@@ -13,7 +13,7 @@ def main(filename: str):
     
     # output wave file
     output_file = filename.replace(".json", ".wav")
-    generator = SoundGenerator(44100, "32-bit")
+    generator = SoundGenerator(44100, music_file.bit_depth())
     generator.write_wav(output_file, music_file) # this only takes a list of tones/chords right now
 
 
