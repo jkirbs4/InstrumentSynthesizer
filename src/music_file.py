@@ -1,3 +1,4 @@
+from src.chord import Chord
 
 
 class MusicFile:
@@ -10,6 +11,20 @@ class MusicFile:
         """
         self.data = json_data
 
+
+    def add_chords(self, track_name: str, chords: list[Chord]) -> None:
+        """
+        Add the chords for a given track produced by an instrument.
+
+        @param track_name (str): The name of a given track.
+        @param chords (list[Chord]): The chords for a given track.
+        """
+        for t, track in enumerate(self.track_names()):
+            if (track == track_name):
+                break
+                
+        self.data["tracks"][t]["chords"] = chords
+
     
     def instruments(self) -> list[str]:
         """
@@ -20,26 +35,15 @@ class MusicFile:
         return list(self.data["instruments"].keys())
     
 
-    def pitches(self, instrument: str) -> list[str]:
+    def partials(self, instrument: str) -> list[tuple[float, float]]:
         """
-        The pitches of a particular instrument.
+        The partials of a particular instrument.
 
         @param instrument (str): The instrument name.
 
-        return (list[str]): The list of pitches for an instrument.
+        return (list[tuple[float, float]]): The list of partials for an instrument.
         """
-        return [partial[0] for partial in self.data["instruments"][instrument]]
-
-
-    def amplitudes(self, instrument: str) -> list[str]:
-        """
-        The amplitudes of a particular instrument.
-
-        @param instrument (str): The instrument name.
-
-        return (list[str]): The list of amplitudes for an instrument.
-        """
-        return [partial[1] for partial in self.data["instruments"][instrument]]
+        return [partial for partial in self.data["instruments"][instrument]]
     
 
     def track_names(self) -> list[str]:
@@ -55,6 +59,8 @@ class MusicFile:
         """
         The sequence of notes for a given track.
 
+        @param track_name (str): The name of the track.
+
         return (list[str]): The list of notes for a track.
         """
         for track in self.data["tracks"]:
@@ -65,6 +71,8 @@ class MusicFile:
     def track_instrument(self, track_name: str) -> str:
         """
         The instrument corresponding to a track.
+
+        @param track_name (str): The name of the track.
 
         return (str): The name of an instrument.
         """
@@ -77,9 +85,24 @@ class MusicFile:
         """
         The dynamic corresponding to a track.
 
+        @param track_name (str): The name of the track.
+
         return (str): A dynamic.
         """
         for track in self.data["tracks"]:
             if (track["name"] == track_name):
                 return track["dynamic"]
+            
+    
+    def track_chords(self, track_name: str) -> list[Chord]:
+        """
+        The chords of a given track.
+
+        @param track_name (str): The name of the track.
+
+        return (list[Chord]): A list of chords.
+        """
+        for track in self.data["tracks"]:
+            if (track["name"] == track_name):
+                return track["chords"]
 

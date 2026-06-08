@@ -2,6 +2,8 @@ import wave
 import math
 import struct
 import os
+from src.music_file import MusicFile
+from src.instrument import Instrument
 
 INT_MAX_8 = 127
 INT_MAX_16 = 32767
@@ -15,6 +17,7 @@ SAMP_WIDTH_8 = 1
 SAMP_WIDTH_16 = 2
 SAMP_WIDTH_24 = 3
 SAMP_WIDTH_32 = 4
+
 
 class SoundGenerator:
 
@@ -35,30 +38,69 @@ class SoundGenerator:
         elif (bit_depth == "32-bit"): self.sample_width = SAMP_WIDTH_32
 
         
-    def write_wav(self, filename: str, notes: list) -> None:
+    def write_wav(self, filename: str, music_file: MusicFile) -> None:
         """
         Convert the music to the WAV file.
 
         @param filename (str): The WAV file name.
-        @param 
-        
-        more
+        @param music_file (MusicFile): The extracted data from the JSON music file.
         """
         if os.path.exists(filename):
-            os.remove(filename)
+            os.remove(filename) # replace current file
 
         with wave.open(filename, "w") as wav:
             wav.setnchannels(self.channels)
             wav.setsampwidth(self.sample_width)
             wav.setframerate(self.sample_rate)
 
-            for note in notes:
-                tones = note.tones()
-                samples = self._note_sample_count(note.get_duration())
+            # pack music file with chord data according to defined instruments
+            self._simulate_instrument_chords(music_file)
+
+            # extract and quantize samples
+            quantized_samples = self._sample_and_quantize(music_file)
+                        
+            # merge track data
+            samples = self._collapse_tracks(quantized_samples)
+
+            # write WAV file
+            self._write_samples(wav, samples)
+
+
+    def _simulate_instrument_chords(self, music_file: MusicFile) -> None:
+        """
+        Modify the music file to represent the chords according to the instruments.
+
+        @param music_file (MusicFile): The synthesizable music data.
+        """
+        for track_name in music_file.track_names():
+            instrument_name = music_file.track_instrument(track_name)
+            instrument = Instrument(music_file.partials(instrument_name), music_file.track_dynamic(track_name))
+            music_file.add_chords(track_name, instrument(music_file.track_notes(track_name)))
+
+
+    def _sample_and_quantize(self, music_file: MusicFile) -> dict:
+        """
+        Sample from the chords and quantize them according to the bit depth.
+
+        @param music_file (MusicFile): The synthesizable music data.
+
+        return (dict): The quantized samples distributed across tracks.
+        """
+        quantized_samples: dict[str, list[int]] = {}
+
+        for track_name in music_file.track_names():
+            quantized_samples[track_name] = []
+            track_chords = music_file.track_chords(track_name)
+
+            # elapsed_exact_samples = 0.0
+            # rendered_samples = 0
+
+            for chord in track_chords:
+                tones = chord.tones()
+                samples = self._note_sample_count(chord.get_duration())
 
                 for s in range(samples):
                     time = self._current_time(s, self.sample_rate) # how far into the sound we are
-
                     sample = 0.0
                     active_tones = 0
 
@@ -72,8 +114,46 @@ class SoundGenerator:
                     if active_tones > 0:
                         sample /= active_tones
 
-                    sample_int = self._sample_to_int(sample) # make the sample discrete
-                    self._write_sample(wav, sample_int) # write sample bytes to .wav file
+                    quantized_samples[track_name].append(self._sample_to_int(sample)) # make the sample discrete and add to list
+        
+        return quantized_samples
+    
+
+    def _collapse_tracks(self, quantized_samples: dict[str, list[int]]):
+        """
+        Transform samples from multiple tracks to become one condensed list of samples.
+
+        @param quantized_samples (dict[str, list[int]]): Quantized samples for each track.
+
+        return (list[int]): The condensed samples.
+        """
+        samples = []
+        first_key = next(iter(quantized_samples))
+        sample_count = len(quantized_samples[first_key])
+        for s in range(sample_count): # initialize all samples to zero
+            samples.append(0)
+
+        for track in list(quantized_samples.keys()): # accumulate sample values
+            for s, sample in enumerate(quantized_samples[track]):
+                samples[s] += sample
+
+        # divide by number of tracks
+        track_count = len(list(quantized_samples.keys()))
+        for s, sample in enumerate(samples):
+            samples[s] = int(sample / track_count)
+
+        return samples
+
+
+    def _write_samples(self, wav, samples: list) -> None:
+        """
+        Write the sample to the WAV file.
+
+        @param wav (Wave_write): The WAV file.
+        @param samples (list[int]): A list of integer samples.
+        """
+        for sample in samples:
+            self._write_sample(wav, sample) # write sample bytes to .wav file
 
 
     def _current_time(self, sample_num: int, sample_rate: int) -> float:
