@@ -137,7 +137,10 @@ class SoundGenerator:
         for track_name in music_file.track_names():
             track_chords = music_file.track_chords(track_name)
             for c in range(len(track_chords)):
-                track_chords[c].duration = track_chords[c].duration * scalefactor
+                chord = track_chords[c]
+                for tone in chord.tones():
+                    tone.duration = tone.duration * scalefactor
+                chord.duration = max(tone.duration for tone in chord.tones())
     
 
     def _collapse_tracks(self, quantized_samples: dict[str, list[int]]):

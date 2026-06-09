@@ -55,29 +55,33 @@ class ScoreReader:
         if not isinstance(note, str):
             raise ValueError("All musical notes must be string values.")
         
-        if not re.fullmatch(r"([A-G])([b#]?)([0-8])([WHQES])(@(pp|mp|mf|ff|p|f))?", note):
-            raise ValueError(f"Symbol must be note, flat or sharp, octave, duration, [@ dynamic]. (ex: Ab4W, B#3Q, C5E@pf)")
+        if not re.fullmatch(r"(([A-G])([b#]?)([0-8])([WHQES])(@(pp|mp|mf|ff|p|f))?)|(R([WHQES]))", note):
+            raise ValueError(f"Symbol must be note, flat or sharp, octave, duration, [@ dynamic] or a rest R, duration. (ex: Ab4W, B#3Q, C5E@pf, RH)")
 
-        # extract pitch
-        if ('b' in note or '#' in note):
-            pitch = note[0:3] # includes a flat or sharp
-            pitchless_note = note[3:]
-        else:
-            pitch = note[0:2] # just the letter and octave
-            pitchless_note = note[2:]
+        if (note[0] == "R"): # detected rest
+            pitch = None
+            duration = self.DURATIONS[note[1]]
+            loudness = 0.0 # no sound
+        else: # detected note
+            # extract pitch
+            if ('b' in note or '#' in note):
+                pitch = note[0:3] # includes a flat or sharp
+                pitchless_note = note[3:]
+            else:
+                pitch = note[0:2] # just the letter and octave
+                pitchless_note = note[2:]
 
-        # extract duration
-        duration_fraction = pitchless_note[0]
-        duration = self.DURATIONS[duration_fraction] # convert to number
+            # extract duration
+            duration_fraction = pitchless_note[0]
+            duration = self.DURATIONS[duration_fraction] # convert to number
 
-        # extract dynamic
-        if '@' in pitchless_note:
-            dynamic = pitchless_note[2:] # extract last one or two characters
-        else:
-            dynamic = self.default_dynamic # resort to default if none provided
-        loudness = self.DYNAMICS[dynamic] # convert to number
+            # extract dynamic
+            if '@' in pitchless_note:
+                dynamic = pitchless_note[2:] # extract last one or two characters
+            else:
+                dynamic = self.default_dynamic # resort to default if none provided
+            loudness = self.DYNAMICS[dynamic] # convert to number
 
         return (pitch, duration, loudness)
-
 
     

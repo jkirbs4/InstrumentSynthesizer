@@ -70,9 +70,9 @@ def test_correct():
 	assert music_file.track_names() == ["Track A", "Track B", "Track C"]
 	assert music_file.track_notes("Track A") == [
         "C4Q@mf", "E4Q@mf", "G4Q@f", "E4Q@mf",
-        "D4Q@mp", "F4Q@mf", "A4Q@f", "G4Q@mf",
+        "D4Q@mp", "RQ", "A4Q@f", "G4Q@mf",
         "E4Q@mf", "G4Q@f", "C5H@ff", "A4Q@mf",
-        "G4H@mf", "E4H@mf", "C4H@mp", "C4H@mp"
+        "G4H@mf", "E4H@mf", "C4H@mp", "RH"
     ]
 	assert music_file.track_notes("Track B") == [
         "C3H@mp", "G3H@mp", "E3Q@mf", "A3Q@mp",
@@ -139,7 +139,7 @@ def test_value_error_general():
         "At least one partial must exist for the instrument.",
 		"Tempo must be of string values '8-bit', '16-bit', '24-bit', or '32-bit'.",
 		"Tempo must be a positive value.",
-        "Symbol must be note, flat or sharp, octave, duration, [@ dynamic]. (ex: Ab4W, B#3Q, C5E@pf)",
+        "Symbol must be note, flat or sharp, octave, duration, [@ dynamic] or a rest R, duration. (ex: Ab4W, B#3Q, C5E@pf, RH)",
         "Track 'name' must be a string value.",
         "Track 'instrument' must be a string value.",
         "Track 'dynamic' must be a string value.",

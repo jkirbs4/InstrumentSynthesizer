@@ -119,8 +119,8 @@ class JsonParser:
                     if not isinstance(note, str):
                         value_errors.append("Track note must be a string value.")
                     # ensure correct note format
-                    if not re.fullmatch(r"([A-G])([b#]?)([0-8])([WHQES])(@(pp|mp|mf|ff|p|f))?", note):
-                        value_errors.append(f"Symbol must be note, flat or sharp, octave, duration, [@ dynamic]. (ex: Ab4W, B#3Q, C5E@pf)")
+                    if not re.fullmatch(r"(([A-G])([b#]?)([0-8])([WHQES])(@(pp|mp|mf|ff|p|f))?)|(R([WHQES]))", note):
+                        value_errors.append(f"Symbol must be note, flat or sharp, octave, duration, [@ dynamic] or a rest R, duration. (ex: Ab4W, B#3Q, C5E@pf, RH)")
                     for char in note:
                         if char in duration_chars:
                             duration_char = char
