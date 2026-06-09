@@ -18,11 +18,11 @@ class ScoreReader:
             "ff": 1.00,
         }
         self.DURATIONS = {
-            "W": 1.0,
-            "H": 0.5,
-            "Q": 0.25,
-            "E": 0.125,
-            "S": 0.0625
+            "W": 4.0,
+            "H": 2.0,
+            "Q": 1.0,
+            "E": 0.5,
+            "S": 0.25
         }
 
         if not isinstance(default_dynamic, str):

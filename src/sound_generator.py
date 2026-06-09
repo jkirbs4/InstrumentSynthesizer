@@ -56,6 +56,9 @@ class SoundGenerator:
             # pack music file with chord data according to defined instruments
             self._simulate_instrument_chords(music_file)
 
+            # scale durations by factor according to BPM
+            self._bpm_scale(music_file)
+
             # extract and quantize samples
             quantized_samples = self._sample_and_quantize(music_file)
                         
@@ -124,6 +127,17 @@ class SoundGenerator:
             quantized_samples[track_name] = track_samples
         
         return quantized_samples
+    
+
+    def _bpm_scale(self, music_file: MusicFile) -> None:
+        """
+        Scale the durations of notes by a factor according to the BPM.
+        """
+        scalefactor = 60 / music_file.tempo()
+        for track_name in music_file.track_names():
+            track_chords = music_file.track_chords(track_name)
+            for c in range(len(track_chords)):
+                track_chords[c].duration = track_chords[c].duration * scalefactor
     
 
     def _collapse_tracks(self, quantized_samples: dict[str, list[int]]):
