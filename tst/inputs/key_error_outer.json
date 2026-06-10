@@ -1,0 +1,19 @@
+{
+  "key1": {
+    "trumpet": [
+      [1.0, 1.0],
+      [2.0, 0.9],
+      [3.0, 0.8]
+    ]
+  },
+  "key2": [
+    {
+      "name": "Track A",
+      "instrument": "trumpet",
+      "dynamic": "mf",
+      "notes": [
+        "C4Q@mf", "G4Q@mf"
+      ]
+    }
+  ]
+}

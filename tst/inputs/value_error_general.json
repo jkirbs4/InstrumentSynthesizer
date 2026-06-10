@@ -1,0 +1,41 @@
+{
+  "instruments": {
+    "trumpet": [
+      [1.0],
+      [2.0, "0.9"],
+      ["3.0", 0.8],
+      [],
+      [1.0, 2.0, 3.0]
+    ],
+    "piano": [
+      
+    ],
+    "flute": {}
+  },
+  "tracks": [
+    {
+      "name": "Track A",
+      "instrument": "trumpet",
+      "dynamic": "mf",
+      "notes": [
+        "C4Q@mf", "H4Q@mf"
+      ]
+    },
+    {
+      "name": 1.0,
+      "instrument": 2.0,
+      "dynamic": 3.0,
+      "notes": 4.0
+    },
+    {
+      "name": "Track A",
+      "instrument": "trumpets",
+      "dynamic": "mfa",
+      "notes": [
+
+      ]
+    }
+  ],
+  "bit-depth": "30-bit",
+  "tempo": -120
+}

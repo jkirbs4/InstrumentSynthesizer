@@ -1,20 +1,32 @@
-from abc import ABC, abstractmethod
 from src.score_reader import ScoreReader
+from src.chord import Chord
+from src.pitch_converter import PitchConverter
+from src.tone import Tone
 
 
-class Instrument(ABC):
+class Instrument:
 
-    def __init__(self, default_dynamic: str):
+    def __init__(self, partials: list[tuple], default_dynamic: str):
         """
         Initialize the hyperparameters of the instrument.
 
+        @param partials (list[tuple]): The collection of harmonics and inharmonics listed as (pitch_weight, amplitude_weight).
         @param default_dynamic (str): The dynamic to default to if one is not provided in the note.
         """
         self.score_reader = ScoreReader(default_dynamic)
+        if not isinstance(partials, list):
+            raise ValueError("Partials must be a list of tuples of floats.")
+        for partial in partials:
+            if not isinstance(partial, tuple):
+                raise ValueError("Each partial must be a tuple of (pitch_weight, amplitude_weight).")
+            if not isinstance(partial[0], float):
+                raise ValueError("The pitch weight must be a float.")
+            if not isinstance(partial[1], float):
+                raise ValueError("The amplitude weight must be a float.")
+        self.partials = partials
 
 
-    @abstractmethod
-    def generate_music(score: list[str]):
+    def __call__(self, score: list[str]) -> list[Chord]:
         """
         Generate a sequence of chords according to the instrument type.
 
@@ -22,17 +34,50 @@ class Instrument(ABC):
 
         return (list[Chord]): A sequence of chords particular to the instrument.
         """
-        return NotImplementedError("Please implement generate_music()")
+        return self._generate_music(score)
     
 
-    def _read_score(self, score):
+    def data(self) -> tuple[list[tuple[float, float]], str]:
         """
-        Read the notes of a score and parse information.
-        
-        @param score (list): The list of notes to parse.
+        Get the partials and default dynamic of the instrument.
 
-        return (list[tuple[str, float, float]]): The parsed information as a list of (pitch, duration, loudness).
+        return (tuple[list[tuple[float, float]]], [str])
         """
-        # use in generate_music() for inheriting class
-        return self.score_reader.read_score(score)
+        return (self.partials, self.score_reader.default_dynamic)
+        
+
+    def _generate_music(self, score: list[str]) -> list[Chord]:
+        """
+        Generate a sequence of chords according to the instrument type.
+
+        @param score (list[str]): A sequence of notes.
+
+        return (list[Chord]): A sequence of chords particular to the instrument.
+        """
+        score_info: list = self.score_reader.read_score(score)
+        return [self._synthesize_note(pitch, duration, loudness) for pitch, duration, loudness in score_info]
+    
+
+    def _synthesize_note(self, pitch: str, duration: float, loudness: float) -> Chord:
+        """
+        Synthesize a note into a chord.
+
+        @param pitch (str): The base pitch of the note.
+        @param duration (float): The duration of the note.
+        @param loudness (float): The loudness of the note.
+
+        return (Chord): The synthesized chord. 
+        """
+        base_frequency = PitchConverter.symbol_to_pitch(pitch)
+
+        tones = [
+            Tone(
+                base_frequency * pitch_weight,
+                duration,
+                loudness * amplitude_weight,
+            )
+            for pitch_weight, amplitude_weight in self.partials
+        ]
+
+        return Chord(tones)
 

@@ -1,0 +1,21 @@
+{
+  "instruments": {
+    "trumpet": [
+      [1.0, 1.0],
+      [2.0, 0.9],
+      [3.0, 0.8]
+    ]
+  },
+  "tracks": [
+    {
+      "key1": "Track A",
+      "key2": "trumpet",
+      "key3": "mf",
+      "key4": [
+        "C4Q@mf", "G4Q@mf"
+      ]
+    }
+  ],
+  "bit-depth": "32-bit",
+  "tempo": 240
+}
