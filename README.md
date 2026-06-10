@@ -6,6 +6,15 @@ An open source tool to convert musical scores represented by `.json` files to `.
 </div>
 
 ---
+## Build
+
+_The `InstrumentSynthesizer` is a terminal-based project at this point without a frontend._
+
+1. Clone the repo to your directory.
+2. Run `./build.sh` to install dependencies to be able to run the synthesizer.
+3. Run `./run.sh` with `music_file.json` as the only argument. The file `music_file.wav` will be the output.
+
+---
 ## Helpful Definitions
 - **_Sinusoid:_** A sine waveform that is continuous, periodic, and can be defined by an amplitude, phase shift, and frequency.
 - **_Fundamental Frequency:_** The frequency that serves as a base freqency in which harmonics and timbre stem off of. A note 'owns' a specific frequency, but instruments by definition play a collection of frequencies. The fundamental frequency is processed to produce this set of output frequencies.
@@ -88,7 +97,7 @@ It is important to make some noteworthy observations regarding this music file:
 - **Track Definition:** Tracks utilize the defined instruments to create sequences of sound, serving as a programatic musical score. Each track has a `"name"` which serves as a unique identifier. Tracks are assigned a single `"instrument"` from the existing bank of instruments already defined. A default `"dynamic"` is assigned which corresponds to the loudness assigned to each note if a specific loudness is not explicitly provided. Most importantly, the sequence of `"notes"` is structured as an array of string values. It is important not to add any more keys or structure to the `.json` file. If any violation is detected by the parser, an error will be raised and the `.wav` file will not be generated.
 
 ### Note Syntax
-A note within `"notes"` is represented as a string value consisting of a letter pitch, an optional flat or sharp, an octave number, the duration, and lastly an optional dynamic specifier. It is specifically recognized by the regular expression `"([A-G])([b#]?)([0-8])([WHQES])(@(pp|mp|mf|ff|p|f))?"`. A flat is represented with the character `"b"` and a sharp is represented by the character `"#"`. Nine octaves are achievable `0-9`, where each step up applies double the pitch. Five potential durations may be selected from, which are represented by the characters `"W"` for a whole note, `"H"` for a half note, `"Q"` for a quarter note, `"E"` for a eighth note, and `"S"` for a sixteenth note. The dynamics and their weight scales are presented below in tabular form:
+A note within `"notes"` is represented as a string value consisting of a letter pitch, an optional flat or sharp, an octave number, the duration, and lastly an optional dynamic specifier. It is specifically recognized by the regular expression `"([A-G])([b#]?)([0-8])([WHQES])(@(pp|mp|mf|ff|p|f))(R([WHQES]))?"`. Notes `A-G` are accepted, or a rest denoted by `R`. A flat is represented with the character `"b"` and a sharp is represented by the character `"#"`. Nine octaves are achievable `0-9`, where each step up applies double the pitch. Five potential durations may be selected from, which are represented by the characters `"W"` for a whole note, `"H"` for a half note, `"Q"` for a quarter note, `"E"` for a eighth note, and `"S"` for a sixteenth note. The dynamics and their weight scales are presented below in tabular form:
 
 <div align="center">
 
@@ -153,7 +162,10 @@ Chords exist when multiple tones are played simultaneously, but how exactly can 
 </div>
 <br>
 
-Second, the base concept of a Fourier Transform must be understood, which is that any complex wave can ultimately be decomposed into a sum of sinusoids. This transform is described by the equation $x(t) = \int_{-\infty}^{\infty} X(f)e^{i2\pi ft}\df$, but will not be directly used for the digital synthesis of sound. As described above, pitch names `A-G` are interpreted by instruments which use a collection of partials to create harmony and timbre. These partials help create new waveforms that stem from the fundamental frequency provided to the instrument which are superimposed to create a composite waveform. After `InstrumentSynthesizer` performs further processing, each track is merged together and the quantized samples of the composite sinusoids are superimposed. This is so that sound data from all tracks is elogantly overlayed at the proper time when writing the samples to the binary `.wav` file.
+> [!Note]
+> Rests can also be thought of as a sinusoid, but with zero amplitude. Samples generated for the rest duration will be attributed a value of zero independent of the frequency value.
+
+Second, the base concept of a Fourier Transform must be understood, which is that any complex wave can ultimately be decomposed into a sum of sinusoids. This transform is described by the equation $x(t) = \int_{-\infty}^{\infty} X(f)e^{i2\pi ft}df$, but will not be directly used for the digital synthesis of sound. As described above, pitch names `A-G` are interpreted by instruments which use a collection of partials to create harmony and timbre. These partials help create new waveforms that stem from the fundamental frequency provided to the instrument which are superimposed to create a composite waveform. After `InstrumentSynthesizer` performs further processing, each track is merged together and the quantized samples of the composite sinusoids are superimposed. This is so that sound data from all tracks is elogantly overlayed at the proper time when writing the samples to the binary `.wav` file.
 
 <div align="center">
   <img width="600" height="450" alt="image" src="https://github.com/user-attachments/assets/47f50ef5-e028-46fb-8087-53605d443dfc" />
@@ -168,6 +180,16 @@ Third, it is important to understand the rules of sampling. The Nyquist–Shanno
   <img width="600" height="450" alt="image" src="https://github.com/user-attachments/assets/78de66dd-e36b-4cf0-a6af-233af9489ae8" />
   <br>
   <em>The Nyquist-Shannon sampling theorem visualized.</em>
+</div>
+<br>
+
+> [!Caution]
+> If the samples for chords are not post-processed with an envelope, then a "popping" sound will occur between notes. This is because of the quick switching behavior of the amplitudes of different chords. Natural instruments do not suffer this sound because there is a mechanical change in vibration that exists due to physical law. In order to compensate for this in the digital world, the boundaries of chords must be softened. This softening can be applied with an envelope, in which the samples at the beginning and end of every chord are shrunk to gradually increase or dampen the amplitude.
+
+<div align="center">
+  <img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/a8ca1b14-2976-4c6b-b1ec-a8610e0f86fd" />
+  <br>
+  <em>Popping behavior and envelope application to sinusoids.</em>
 </div>
 <br>
 
@@ -217,7 +239,7 @@ Fourth, the sampled values must be quantized. Quantization involves subjecting e
 Fifth, the samples from each track must be superimposed by summing integer arrays, then each element must be re-normalized to be between zero and the maximum value. This adds further complexity by summing already composite waveforms, but is critical to be able to write the data for all instruments to the `.wav` file in a single stream. Tracks must be superimposed at the sample level rather than at the `Chord` object level because chord durations may not be equivalent, leading to disalignment.
 
 <div align="center">
-  <img width="600" height="350" alt="image" src="https://github.com/user-attachments/assets/861ac172-d7de-45b2-99d6-e997e3583d4f" />
+  <img width="600" height="300" alt="image" src="https://github.com/user-attachments/assets/861ac172-d7de-45b2-99d6-e997e3583d4f" />
   <br>
   <em>Superposition and re-normalization of audio sample arrays.</em>
 </div>
@@ -226,7 +248,7 @@ Fifth, the samples from each track must be superimposed by summing integer array
 Sixth, the final stage of ADC must be applied as quantized samples must be encoded into binary values that can be written to a `.wav` file. At this stage of the processing pipeline, each sample integer now contains the information of all instruments at a given time step. These samples can be written in binary to the audio file which can be played back by a computer. Modern computers have a `audio codec chip` on the motherboard with a built-in DAC to play the audio.
 
 <div align="center">
-  <img width="600" height="350" alt="image" src="https://github.com/user-attachments/assets/c6e2c24e-98b1-4116-aab7-ab5ff0f22357" />
+  <img width="600" height="300" alt="image" src="https://github.com/user-attachments/assets/c6e2c24e-98b1-4116-aab7-ab5ff0f22357" />
   <br>
   <em>Superposition and re-normalization of audio sample arrays.</em>
 </div>
