@@ -87,7 +87,8 @@ The `InstrumentSynthesizer` tool ingests `.json` files as input, processes them,
         "E5H@p", "C5H@mp"
       ]
     }
-  ]
+  ],
+  "tempo": 120
 }
 ```
 ### Features
